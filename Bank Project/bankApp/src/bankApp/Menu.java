@@ -27,7 +27,8 @@ public class Menu {
 	}
 
 	private void printMenu() {
-		System.out.println("Qual operação deseja realizar?");
+		displayHeader("Selecione sua operação");
+		
 		System.out.println("1. Para Criar nova conta");
 		System.out.println("2. Realizar um depósito");
 		System.out.println("3. Realizar um Saque");
@@ -36,9 +37,11 @@ public class Menu {
 	}
 
 	private void printHeader() {		
-		System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+		System.out.println("$-----------------------------$");
+		System.out.println("|                             |");
 		System.out.println("$ Bem vindo ao Banco Vivaldi! $");
-		System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+		System.out.println("|                             |");
+		System.out.println("$-----------------------------$");
 	}
 	
 	private int getInput(){
@@ -58,8 +61,7 @@ public class Menu {
 		}while(choice < 0 || choice > 4);
 		return choice;
 	}
-	
-	
+		
 	private void peformAction(int choice)  {
 		switch(choice) {
 			case 0:
@@ -86,8 +88,6 @@ public class Menu {
 				System.out.println("Erro desconhecido!");
 		}
 	}
-
-
 	
 	private String askQuestion(String question , List<String> answers) {
 		String response = "";
@@ -100,12 +100,12 @@ public class Menu {
 			}
 			System.out.print(question);
 			if(choice) {
-				System.out.println("(");
+				System.out.print("(");
 				for(int i = 0 ; i < answers.size() - 1 ; i++) {
 					System.out.print(answers.get(i) + "/");
 				}
-				System.out.println(answers.get(answers.size() - 1));
-				System.out.print(") : ");
+				System.out.print(answers.get(answers.size() - 1));
+				System.out.print(") :");
 			}
 			response = put.nextLine();
 			firstRun = false;
@@ -150,6 +150,7 @@ public class Menu {
 	
 	private void createAccount() throws InvalidAccountTypeException {
 		// Receber informações da conta.
+		displayHeader("Inserir informações");
 		String accountType = askQuestion("Qual tipo de conta deseja criar?" , Arrays.asList("corrente" , "poupança"));			
 		String firstName = askQuestion("Inserir nome: ", null);
 		String lastName = askQuestion("Inserir sobrenome: ", null);
@@ -209,6 +210,7 @@ public class Menu {
 	}
 
 	private void makeAWithdraw() {
+		displayHeader("Faça seu saque");
 		int account = selectAccount();
 		if(account >= 0) {
 			double amount = getAmount("Qual quantia deseja sacar?: ");
@@ -217,6 +219,7 @@ public class Menu {
 		}
 	
 	private void makeADeposit() {
+		displayHeader("Faça seu depósito");
 		int account = selectAccount();
 		if(account >= 0) {
 			double amount = getAmount("Qual quantia deseja depositar?: ");
@@ -224,11 +227,26 @@ public class Menu {
 	}
 		}
 	
+	private void displayHeader(String message) {
+		System.out.println();
+		int width = message.length() - 6;
+		StringBuilder sb = new StringBuilder();
+		sb.append("$");
+		for(int i = 0 ; i < width ; i++) {
+			sb.append("--");
+		}
+		sb.append("$");
+		System.out.println(sb.toString());
+		System.out.println("      " + message + "   ");
+		System.out.println(sb.toString());
+	}
 	
-	private void listBalances() {
-		int account = selectAccount();
+ 	private void listBalances() {
+ 		displayHeader("Selecione conta para ver detalhes");
+ 		int account = selectAccount();
 		if(account >= 0) {
-			System.out.println(bank.getCustomer(account).getAccount()); 
+			displayHeader("Informações do cliente");
+			System.out.println(bank.getCustomer(account).getAccount()); 	
 	}else {
 		System.out.println("Conta selecionada é inválida!");
 	}
