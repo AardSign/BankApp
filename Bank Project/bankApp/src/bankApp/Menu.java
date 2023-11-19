@@ -1,5 +1,6 @@
 package bankApp;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Menu {
@@ -67,18 +68,19 @@ public class Menu {
 				createAccount();
 				break;
 			case 2:
-				//makeADeposit();
+				makeADeposit();
 			case 3:
-				//makeAWithdraw();
+				makeAWithdraw();
 				break;
 			case 4:
-				//listBalances();
+				listBalances();
 				break;
 				
 			default:
 				System.out.println("Erro desconhecido!");
 		}
 	}
+
 
 	private void createAccount() {
 		String accountType = "", firstName , lastName , cpf;
@@ -130,15 +132,76 @@ public class Menu {
 					}
 			}
 		// Agora posso usar poliformismo para criar uma conta.
-		Account account;
+		Account account = null;
 		if(accountType.equalsIgnoreCase("Corrente")) {
 			account = new Checking(initialDeposit);
 		}
 		if(accountType.equalsIgnoreCase("Poupança")){
 			account = new Savings(initialDeposit);
 		}
+		Costumer customer = new Costumer(firstName , lastName , cpf , account);
+		bank.AddCustomer(customer);
 	}
 	
-	
-	
-}
+	private void makeADeposit() {
+		int account = selectAccount();
+		System.out.print("Qual quantia deseja depositar?: ");
+		if(account >= 0) {
+			double amount = 0;
+			try{
+				amount = Double.parseDouble(scan.nextLine());
+			}catch(NumberFormatException e) {
+				amount = 0;
+			}
+			bank.getCustomer(account).getAccount().deposit(amount);
+	}
+		}
+
+	private int selectAccount() {
+		ArrayList<Costumer> customers = bank.getCustomers();
+		if(customers.size() <=0 ) {
+			System.out.println("Nenhum cliente registrado.");
+			return -1;
+		}
+		System.out.println("Selecione uma conta: ");
+		for(int i = 0 ; i < customers.size() ; i++) {
+			System.out.println((i + 1) + ") " + customers.get(i).basicInfo());
+		}
+		int account = 0;
+		System.out.print("Qual conta deseja acessar?: ");
+		try {
+			account = Integer.parseInt(scan.nextLine()) -1;
+		}
+		catch(NumberFormatException e) {
+			account = -1;
+		}
+		if(account < 0 || account > customers.size()) {
+			System.out.println("Conta selecionada é inválida!");
+			account = -1;
+		}
+		
+		return account;
+	}
+	private void listBalances() {
+		int account = selectAccount();
+		if(account >= 0) {
+			System.out.println(bank.getCustomer(account).getAccount()); 
+	}else {
+		System.out.println("Conta selecionada é inválida!");
+	}
+		
+	}
+	private void makeAWithdraw() {
+		int account = selectAccount();
+		System.out.print("Qual quantia deseja sacar?: ");
+		if(account >= 0) {
+			double amount = 0;
+			try{
+				amount = Double.parseDouble(scan.nextLine());
+			}catch(NumberFormatException e) {
+				amount = 0;
+			}
+			bank.getCustomer(account).getAccount().withdraw(amount);
+			}
+		}
+	}
