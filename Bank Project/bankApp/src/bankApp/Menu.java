@@ -115,7 +115,8 @@ public class Menu {
 		}while(!answers.contains(response));
 		
 		return response;
-	}
+		
+		}
 	
 	private double getDeposit(String accountType) {
 		boolean valid = false;	
