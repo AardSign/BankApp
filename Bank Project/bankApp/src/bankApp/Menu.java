@@ -1,6 +1,8 @@
 package bankApp;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 public class Menu {
@@ -9,13 +11,13 @@ public class Menu {
 	Bank bank = new Bank();
 	boolean exit;
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InvalidAccountTypeException {
 		Menu menu = new Menu();
 		
 		menu.runMenu();
 	}
 	
-	public void runMenu() {
+	public void runMenu() throws InvalidAccountTypeException {
 		printHeader();
 		while(!exit) {
 			printMenu();
@@ -58,14 +60,18 @@ public class Menu {
 	}
 	
 	
-	private void peformAction(int choice) {
+	private void peformAction(int choice)  {
 		switch(choice) {
 			case 0:
 				System.out.println("Obrigado por usar nosso aplicativo!");
 				System.exit(0);
 				break;
 			case 1:
+			try {
 				createAccount();
+			} catch (InvalidAccountTypeException e) {
+				System.out.println("Falha ao criar conta. Tente novamente.");;
+			}
 				break;
 			case 2:
 				makeADeposit();
@@ -82,30 +88,38 @@ public class Menu {
 	}
 
 
-	private void createAccount() {
-		String accountType = "", firstName , lastName , cpf;
+	
+	private String askQuestion(String question , List<String> answers) {
+		String response = "";
+		Scanner put = new Scanner(System.in);
+		boolean choice = ((answers == null) || answers.size() == 0) ? false : true;
+		boolean firstRun = true;
+		do{
+			if(!firstRun) {
+				System.out.println("Opção inválida!");
+			}
+			System.out.print(question);
+			if(choice) {
+				System.out.println("(");
+				for(int i = 0 ; i < answers.size() - 1 ; i++) {
+					System.out.print(answers.get(i) + "/");
+				}
+				System.out.println(answers.get(answers.size() - 1));
+				System.out.print(") : ");
+			}
+			response = put.nextLine();
+			firstRun = false;
+			if(!choice) {
+				break;
+			}
+		}while(!answers.contains(response));
+		
+		return response;
+	}
+	
+	private double getDeposit(String accountType) {
+		boolean valid = false;	
 		double initialDeposit = 0;
-		boolean valid = false;
-		
-		while(!valid) {
-			System.out.println("Qual tipo de conta deseja criar? (Corrente/Poupança)");
-			accountType = scan.nextLine();
-			
-			if(accountType.equalsIgnoreCase("Corrente") || accountType.equalsIgnoreCase("Poupança")){
-				valid = true;
-			}
-			else {
-				System.out.println("Escolher entre os dois tipos disponiveis!");
-			}
-		}
-		System.out.print("Inserir nome: ");
-		firstName = scan.nextLine();
-		System.out.print("Inserir sobrenome: ");
-		lastName = scan.nextLine();
-		System.out.print("Inserir seu CPF: ");
-		cpf = scan.nextLine();
-		
-		valid = false;			
 		while(!valid) {
 				System.out.println("Qual será seu depósito inicial?");
 				try {
@@ -131,31 +145,31 @@ public class Menu {
 						}	
 					}
 			}
+		return initialDeposit;
+	}
+	
+	private void createAccount() throws InvalidAccountTypeException {
+		// Receber informações da conta.
+		String accountType = askQuestion("Qual tipo de conta deseja criar?" , Arrays.asList("corrente" , "poupança"));			
+		String firstName = askQuestion("Inserir nome: ", null);
+		String lastName = askQuestion("Inserir sobrenome: ", null);
+		String cpf = askQuestion("Inserir seu CPF: ", null);
+		double initialDeposit = getDeposit(accountType);
+		
 		// Agora posso usar poliformismo para criar uma conta.
 		Account account = null;
 		if(accountType.equalsIgnoreCase("Corrente")) {
 			account = new Checking(initialDeposit);
 		}
-		if(accountType.equalsIgnoreCase("Poupança")){
+		else if(accountType.equalsIgnoreCase("Poupança")){
 			account = new Savings(initialDeposit);
+		}
+		else {
+			throw new InvalidAccountTypeException();
 		}
 		Costumer customer = new Costumer(firstName , lastName , cpf , account);
 		bank.AddCustomer(customer);
 	}
-	
-	private void makeADeposit() {
-		int account = selectAccount();
-		System.out.print("Qual quantia deseja depositar?: ");
-		if(account >= 0) {
-			double amount = 0;
-			try{
-				amount = Double.parseDouble(scan.nextLine());
-			}catch(NumberFormatException e) {
-				amount = 0;
-			}
-			bank.getCustomer(account).getAccount().deposit(amount);
-	}
-		}
 
 	private int selectAccount() {
 		ArrayList<Costumer> customers = bank.getCustomers();
@@ -182,6 +196,35 @@ public class Menu {
 		
 		return account;
 	}
+	
+	private double getAmount(String question) {
+		System.out.println(question);
+		double amount = 0;
+		try{
+			amount = Double.parseDouble(scan.nextLine());
+		}catch(NumberFormatException e) {
+			amount = 0;
+		}
+		return amount;
+	}
+
+	private void makeAWithdraw() {
+		int account = selectAccount();
+		if(account >= 0) {
+			double amount = getAmount("Qual quantia deseja sacar?: ");
+			bank.getCustomer(account).getAccount().withdraw(amount);
+			}
+		}
+	
+	private void makeADeposit() {
+		int account = selectAccount();
+		if(account >= 0) {
+			double amount = getAmount("Qual quantia deseja depositar?: ");
+			bank.getCustomer(account).getAccount().deposit(amount);
+	}
+		}
+	
+	
 	private void listBalances() {
 		int account = selectAccount();
 		if(account >= 0) {
@@ -189,19 +232,5 @@ public class Menu {
 	}else {
 		System.out.println("Conta selecionada é inválida!");
 	}
-		
-	}
-	private void makeAWithdraw() {
-		int account = selectAccount();
-		System.out.print("Qual quantia deseja sacar?: ");
-		if(account >= 0) {
-			double amount = 0;
-			try{
-				amount = Double.parseDouble(scan.nextLine());
-			}catch(NumberFormatException e) {
-				amount = 0;
-			}
-			bank.getCustomer(account).getAccount().withdraw(amount);
-			}
 		}
 	}
