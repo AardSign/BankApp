@@ -74,21 +74,94 @@ public class BankDB {
 	}
 	
 
-}
+
 
 //Read
 	
 	Costumer getAccount(int AccountID) {
 		Costumer customer = null;
 		Connection connection = connect();
-		String findUserSql = "";
-		PreparedStatement findUser = connection.prepareStatement(findUserSql);
-		
-				
+		try{
+			String findUserSql = "select firstName , lastName , cpf , type , balance "
+							 + "from Users a join Mappings b on a.ID = b.UserID"
+							 + "join accounts c on c.ID = b.AccountID "
+								 + "where c.ID" ;
+			PreparedStatement findUser = connection.prepareStatement(findUserSql);
+			findUser.setInt(1 , AccountID);
+			ResultSet findUserResults = findUser.executeQuery();
+			if(findUserResults.next()) {
+				String firstName = findUserResults.getString("firstName");
+				String lastName = findUserResults.getString("lastName");
+				String cpf = findUserResults.getString("cpf");
+				AccountType type = AccountType.valueOf(findUserResults.getString("type"));
+				double balance = findUserResults.getDouble("balance");
+			
+			Account account;
+			if(type == AccountType.checking) {
+				account = new Checking(AccountID , balance);
+			}else if(type == AccountType.saving) {
+				account = new Savings(AccountID , balance);
+			}else {
+				throw new Exception("Tipo de conta desconhecido");
+			}
+			customer = new Costumer(firstName , lastName , cpf , account);
+			
+			
+		}else {
+				System.err.println("Nenhum usuário foi encontrado para o ID " + AccountID);
+		}
+			}
+		catch(Exception e) {
+			System.err.println(e.getMessage());
+		}		
 				return customer;
-	}
+				}
+	
+	
 
-//U
-//D
+
+//Update
+	boolean UpdateAccount(int accountID , double balance) {
+		boolean success = false;
+		Connection connection = connect();
+		
+		try {
+			String updateSql = "UPDATE Accounts SET Balance = ? WHERE ID = ?";
+			PreparedStatement updateBalance = connection.prepareStatement(updateSql);
+			updateBalance.setDouble(1 , balance);
+			updateBalance.setInt(2 , accountID);
+			updateBalance.executeUpdate();
+			success = true;
+		} catch (SQLException e) {
+			System.err.println(e.getMessage());
+		
+	}return success;
+		}
+	
+	
+//Delete
+
+	boolean DeleteAccount(int accountID) {
+		boolean success = false;
+		Connection connection = connect();
+		
+		try {
+			String deleteSql = "DELETE Users , Accounts "
+					+ "from Users a join Mappings b on a.ID = b.UserID"
+					+ "	join accounts c on c.ID = b.AccountID"
+					+ "where c.ID\" ;";
+			PreparedStatement deleteAccount = connection.prepareStatement(deleteSql);
+			deleteAccount.setInt(1 , accountID);
+			deleteAccount.executeUpdate();
+			success = true;
+		} catch (SQLException e) {
+			System.err.println(e.getMessage());
+		
+	}return success;
+		}
+
+	
 
 
+
+}
