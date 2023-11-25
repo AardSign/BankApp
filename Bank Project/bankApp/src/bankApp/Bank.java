@@ -17,4 +17,9 @@ public class Bank {
 	ArrayList<Costumer> getCustomers(){
 		return customers;
 	}
+	
+	Costumer deleteAccount(int account) {
+		customers.remove(account);
+		return null;
+	}
 }

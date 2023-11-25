@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 public class BankDB {
 	String url = "jdbc:mysql://localhost:3306/bankdb";
@@ -149,7 +150,7 @@ public class BankDB {
 			String deleteSql = "DELETE Users , Accounts "
 					+ "from Users a join Mappings b on a.ID = b.UserID"
 					+ "	join accounts c on c.ID = b.AccountID"
-					+ "where c.ID\" ;";
+					+ "where c.ID";
 			PreparedStatement deleteAccount = connection.prepareStatement(deleteSql);
 			deleteAccount.setInt(1 , accountID);
 			deleteAccount.executeUpdate();
@@ -160,8 +161,38 @@ public class BankDB {
 	}return success;
 		}
 
+	ArrayList<Costumer> GetAllAccount(){
+		ArrayList<Costumer> customers = new ArrayList();
+		Connection connection = connect();
+		try {
+			String findAllUsersSql = "select AccountID , firstName , lastName , cpf , type , balance "
+					 + "from Users a join Mappings b on a.ID = b.UserID"
+					 + "join accounts c on c.ID = b.AccountID ";					
+			PreparedStatement findAllUsers = connection.prepareStatement(findAllUsersSql);
+			ResultSet findUserResults = findAllUsers.executeQuery();
+			while(findUserResults.next()) {
+				String firstName = findUserResults.getString("firstName");
+				String lastName = findUserResults.getString("lastName");
+				String cpf = findUserResults.getString("cpf");
+				AccountType type = AccountType.valueOf(findUserResults.getString("type"));
+				double balance = findUserResults.getDouble("balance");	
+				int AccountID = findUserResults.getInt("AccountID");
+				Account account;
+				if(type == AccountType.checking) {
+					account = new Checking(AccountID , balance);
+				}else if(type == AccountType.saving) {
+					account = new Savings(AccountID , balance);
+				}else {
+					throw new Exception("Tipo de conta desconhecido");
+				}
+				customer = new Costumer(firstName , lastName , cpf , account);
+			}
+		
+		}catch(Exception e) {
+			System.err.println(e.getMessage());
+		}
+			return customers;
+			}
+		
 	
-
-
-
 }

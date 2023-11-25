@@ -33,6 +33,7 @@ public class Menu {
 		System.out.println("2. Realizar um depósito");
 		System.out.println("3. Realizar um Saque");
 		System.out.println("4. Listar saldo da conta");
+		System.out.println("5. Fechar conta");
 		System.out.println("0. Sair");	
 	}
 
@@ -55,10 +56,10 @@ public class Menu {
 				System.out.println("Opção Inválida!");
 				System.out.println("Digitar apenas números!!");
 			}
-			if(choice < 0 || choice > 4) {
-				System.out.println("Escolher opção entre 0 e 4!");
+			if(choice < 0 || choice > 5) {
+				System.out.println("Escolher opção entre 0 e 5!");
 			}
-		}while(choice < 0 || choice > 4);
+		}while(choice < 0 || choice > 5);
 		return choice;
 	}
 		
@@ -83,12 +84,16 @@ public class Menu {
 			case 4:
 				listBalances();
 				break;
+			case 5:
+				deleteAccount();
+				break;
 				
 			default:
 				System.out.println("Erro desconhecido!");
 		}
 	}
 	
+
 	private String askQuestion(String question , List<String> answers) {
 		String response = "";
 		Scanner put = new Scanner(System.in);
@@ -115,8 +120,7 @@ public class Menu {
 		}while(!answers.contains(response));
 		
 		return response;
-		
-		}
+	}
 	
 	private double getDeposit(String accountType) {
 		boolean valid = false;	
@@ -198,6 +202,32 @@ public class Menu {
 		
 		return account;
 	}
+	
+	private void deleteAccount() {
+		ArrayList<Costumer> customers = bank.getCustomers();
+		if(customers.size() <=0 ) {
+			System.out.println("Nenhum cliente registrado.");
+			return;
+		}
+		System.out.println("Selecione uma conta: ");
+		for(int i = 0 ; i < customers.size() ; i++) {
+			System.out.println((i + 1) + ") " + customers.get(i).basicInfo());
+		}
+		int account = 0;
+		System.out.print("Qual conta deseja fechar?: ");
+		try {
+			account = Integer.parseInt(scan.nextLine()) -1;
+			bank.deleteAccount(account);
+		}
+		catch(Exception e) {
+			account = -1;
+		}
+		if(account < 0 || account > customers.size()) {
+			System.out.println("Conta selecionada é inválida!");
+			account = -1;
+		}
+	}
+
 	
 	private double getAmount(String question) {
 		System.out.println(question);
