@@ -216,8 +216,23 @@ public class Menu {
 		int account = 0;
 		System.out.print("Qual conta deseja fechar?: ");
 		try {
+			int choice = 0;
 			account = Integer.parseInt(scan.nextLine()) -1;
-			bank.deleteAccount(account);
+			System.out.println("Você tem certeza disso?");
+			System.out.println("Para confirmar digite: 1");
+			System.out.println("Para cancelar operação digite: 2");
+			choice = Integer.parseInt(scan.nextLine());
+			if(choice == 1) {
+				System.out.println("Conta encerrada com sucesso!");
+				bank.deleteAccount(account);
+			}
+			else if(choice == 2) {
+				System.out.println("Operação cancelada com sucesso!");
+			}
+			else {
+				System.out.println("Opção invalida por favor escolher entre 1 e 2!");
+				return;
+			}
 		}
 		catch(Exception e) {
 			account = -1;
